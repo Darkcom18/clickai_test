@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Streamlit
+.streamlit/
+
+# ML Models
+ml_models/models/*.pkl
+ml_models/models/*.joblib
+ml_models/models/*.h5
+ml_models/models/*.pt
+ml_models/models/*.pth
+ml_models/models/*.onnx
+!ml_models/models/.gitkeep
+
+# Datasets
+datasets/
+*.csv
+*.json
+*.parquet
+!**/sample_data/*.csv
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Credentials
+credentials.json
+token.json
+*.key
+*.pem
+
+
