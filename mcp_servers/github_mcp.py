@@ -192,16 +192,23 @@ class GitHubMCPServer:
 
 # Global instance
 _github_mcp: Optional[GitHubMCPServer] = None
+_last_github_token: Optional[str] = None
 
 
 def get_github_mcp() -> GitHubMCPServer:
     """Get or create GitHub MCP server instance."""
-    global _github_mcp
-    if _github_mcp is None:
+    global _github_mcp, _last_github_token
+    
+    # Reload if token changed (for dynamic credentials from UI)
+    current_token = config.GITHUB_TOKEN
+    if _github_mcp is None or _last_github_token != current_token:
         try:
             _github_mcp = GitHubMCPServer()
+            _last_github_token = current_token
         except Exception as e:
             print(f"Warning: Could not initialize GitHub MCP: {e}")
             _github_mcp = GitHubMCPServer()  # Will have initialized=False
+            _last_github_token = current_token
+    
     return _github_mcp
 

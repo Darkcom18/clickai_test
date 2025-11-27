@@ -16,7 +16,17 @@ except ImportError:
 
 
 def get_secret(key: str, default: str = "") -> str:
-    """Get secret from Streamlit secrets or environment variable."""
+    """Get secret from session state, Streamlit secrets, or environment variable."""
+    # Priority 1: Check session state (user input from UI)
+    if USE_STREAMLIT_SECRETS:
+        try:
+            session_key = f"user_{key}"
+            if hasattr(st.session_state, session_key) and st.session_state.get(session_key):
+                return st.session_state[session_key]
+        except:
+            pass
+    
+    # Priority 2: Check Streamlit secrets
     if USE_STREAMLIT_SECRETS:
         try:
             # Try to get from Streamlit secrets
@@ -30,7 +40,7 @@ def get_secret(key: str, default: str = "") -> str:
         except (AttributeError, KeyError, TypeError):
             pass
     
-    # Fallback to environment variable
+    # Priority 3: Fallback to environment variable
     return os.getenv(key, default)
 
 

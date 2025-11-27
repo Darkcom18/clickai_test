@@ -129,16 +129,23 @@ class N8NMCPServer:
 
 # Global instance
 _n8n_mcp: Optional[N8NMCPServer] = None
+_last_n8n_url: Optional[str] = None
 
 
 def get_n8n_mcp() -> N8NMCPServer:
     """Get or create n8n MCP server instance."""
-    global _n8n_mcp
-    if _n8n_mcp is None:
+    global _n8n_mcp, _last_n8n_url
+    
+    # Reload if URL changed (for dynamic credentials from UI)
+    current_url = config.N8N_WEBHOOK_BASE_URL
+    if _n8n_mcp is None or _last_n8n_url != current_url:
         try:
             _n8n_mcp = N8NMCPServer()
+            _last_n8n_url = current_url
         except Exception as e:
             print(f"Warning: Could not initialize n8n MCP: {e}")
             _n8n_mcp = N8NMCPServer()  # Will have initialized=False
+            _last_n8n_url = current_url
+    
     return _n8n_mcp
 

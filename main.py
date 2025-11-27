@@ -41,6 +41,131 @@ def main():
         st.header("⚙️ Configuration")
         st.info("✅ Configuration valid")
         
+        # Settings button
+        if st.button("🔧 Settings", use_container_width=True):
+            st.session_state.show_settings = not st.session_state.get("show_settings", False)
+        
+        # Settings panel
+        if st.session_state.get("show_settings", False):
+            st.divider()
+            st.subheader("🔐 Credentials Settings")
+            
+            # Status indicators
+            st.markdown("**Agent Status:**")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                github_status = "✅" if (st.session_state.get("user_GITHUB_TOKEN") or config.GITHUB_TOKEN) else "❌"
+                st.markdown(f"GitHub: {github_status}")
+            with col2:
+                n8n_status = "✅" if (st.session_state.get("user_N8N_WEBHOOK_BASE_URL") or config.N8N_WEBHOOK_BASE_URL) else "❌"
+                st.markdown(f"n8n: {n8n_status}")
+            with col3:
+                drive_status = "⚠️"  # Complex setup
+                st.markdown(f"Drive: {drive_status}")
+            
+            with st.expander("GitHub", expanded=False):
+                st.markdown("""
+                **How to get GitHub Token:**
+                1. Go to: https://github.com/settings/tokens
+                2. Click "Generate new token" → "Generate new token (classic)"
+                3. Select scopes: `repo` (full control)
+                4. Copy token and paste below
+                """)
+                github_token = st.text_input(
+                    "GitHub Token",
+                    value=st.session_state.get("user_GITHUB_TOKEN", config.GITHUB_TOKEN or ""),
+                    type="password",
+                    help="Get token from: https://github.com/settings/tokens"
+                )
+                github_username = st.text_input(
+                    "GitHub Username",
+                    value=st.session_state.get("user_GITHUB_USERNAME", config.GITHUB_USERNAME or ""),
+                    help="Your GitHub username"
+                )
+                if st.button("💾 Save GitHub", use_container_width=True):
+                    st.session_state.user_GITHUB_TOKEN = github_token
+                    st.session_state.user_GITHUB_USERNAME = github_username
+                    # Force reload by clearing cache
+                    import mcp_servers.github_mcp as github_mcp_module
+                    github_mcp_module._github_mcp = None
+                    github_mcp_module._last_github_token = None
+                    st.success("GitHub credentials saved! Try using GitHub agent now.")
+                    st.rerun()
+            
+            with st.expander("n8n Webhook", expanded=False):
+                st.markdown("""
+                **How to get n8n Webhook URL:**
+                1. Open your n8n workflow
+                2. Add a "Webhook" node
+                3. Copy the webhook URL (e.g., `https://your-n8n.com/webhook/abc123`)
+                4. Paste below
+                """)
+                n8n_url = st.text_input(
+                    "n8n Webhook URL",
+                    value=st.session_state.get("user_N8N_WEBHOOK_BASE_URL", config.N8N_WEBHOOK_BASE_URL or ""),
+                    help="Example: https://your-n8n.com/webhook/abc123",
+                    placeholder="https://your-n8n.com/webhook/..."
+                )
+                n8n_token = st.text_input(
+                    "n8n Token (optional)",
+                    value=st.session_state.get("user_N8N_WEBHOOK_TOKEN", config.N8N_WEBHOOK_TOKEN or ""),
+                    type="password",
+                    help="Optional authentication token"
+                )
+                if st.button("💾 Save n8n", use_container_width=True):
+                    st.session_state.user_N8N_WEBHOOK_BASE_URL = n8n_url
+                    st.session_state.user_N8N_WEBHOOK_TOKEN = n8n_token
+                    # Force reload by clearing cache
+                    import mcp_servers.n8n_mcp as n8n_mcp_module
+                    n8n_mcp_module._n8n_mcp = None
+                    n8n_mcp_module._last_n8n_url = None
+                    st.success("n8n credentials saved! Try using n8n agent now.")
+                    st.rerun()
+            
+            with st.expander("Google Drive", expanded=False):
+                st.info("""
+                **Google Drive Setup:**
+                
+                Google Drive requires OAuth flow which is complex in web apps.
+                
+                **Option 1:** Upload credentials.json file (if you have it)
+                
+                **Option 2:** Use local setup:
+                1. Download credentials.json from Google Cloud Console
+                2. Place in project root
+                3. Run locally to authorize
+                
+                See SETUP.md for detailed instructions.
+                """)
+                
+                uploaded_file = st.file_uploader(
+                    "Upload credentials.json",
+                    type=["json"],
+                    help="Upload your Google Drive credentials.json file"
+                )
+                if uploaded_file is not None:
+                    # Save uploaded file
+                    import json
+                    creds_data = json.load(uploaded_file)
+                    # Note: In production, you'd save this securely
+                    st.warning("File upload received. Note: In Streamlit Cloud, file storage is temporary.")
+                    st.json(creds_data)
+            
+            with st.expander("Clear All Settings", expanded=False):
+                st.warning("This will clear all user-entered credentials from this session.")
+                if st.button("🗑️ Clear All", use_container_width=True):
+                    keys_to_clear = [
+                        "user_GITHUB_TOKEN", "user_GITHUB_USERNAME",
+                        "user_N8N_WEBHOOK_BASE_URL", "user_N8N_WEBHOOK_TOKEN"
+                    ]
+                    for key in keys_to_clear:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.success("Settings cleared!")
+                    st.rerun()
+            
+            st.divider()
+        
         st.header("📋 Available Agents")
         st.markdown("""
         - **Chat Agent**: Trả lời câu hỏi đơn giản
