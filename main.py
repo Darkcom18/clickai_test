@@ -123,19 +123,23 @@ def main():
                     st.rerun()
             
             with st.expander("Google Drive", expanded=False):
-                st.info("""
-                **Google Drive Setup:**
+                st.markdown("""
+                **Google Drive OAuth Setup:**
                 
-                Google Drive requires OAuth flow which is complex in web apps.
+                Google Drive cần OAuth flow phức tạp. Có 2 cách:
+                """)
                 
-                **Option 1:** Upload credentials.json file (if you have it)
+                st.markdown("""
+                **Cách 1: Setup Local (Khuyến nghị)**
+                1. Download `credentials.json` từ Google Cloud Console
+                2. Đặt vào thư mục project
+                3. Chạy: `python setup_drive_oauth.py`
+                4. Browser sẽ mở để authorize
+                5. Token sẽ được lưu vào `token.json`
                 
-                **Option 2:** Use local setup:
-                1. Download credentials.json from Google Cloud Console
-                2. Place in project root
-                3. Run locally to authorize
-                
-                See SETUP.md for detailed instructions.
+                **Cách 2: Upload credentials.json (Temporary)**
+                - Upload file credentials.json
+                - ⚠️ Lưu ý: Trong Streamlit Cloud, file chỉ tồn tại trong session
                 """)
                 
                 uploaded_file = st.file_uploader(
@@ -144,12 +148,27 @@ def main():
                     help="Upload your Google Drive credentials.json file"
                 )
                 if uploaded_file is not None:
-                    # Save uploaded file
                     import json
-                    creds_data = json.load(uploaded_file)
-                    # Note: In production, you'd save this securely
-                    st.warning("File upload received. Note: In Streamlit Cloud, file storage is temporary.")
-                    st.json(creds_data)
+                    try:
+                        creds_data = json.load(uploaded_file)
+                        st.success("✅ File credentials.json đã được upload!")
+                        st.info("⚠️ Lưu ý: File này chỉ tồn tại trong session hiện tại.")
+                        st.json(creds_data)
+                        st.markdown("""
+                        **Tiếp theo:**
+                        - File đã được nhận nhưng cần authorize để lấy token
+                        - Chạy `python setup_drive_oauth.py` local để authorize
+                        - Hoặc xem hướng dẫn trong SETUP.md
+                        """)
+                    except Exception as e:
+                        st.error(f"❌ Lỗi đọc file: {str(e)}")
+                
+                st.markdown("---")
+                st.markdown("""
+                **Quick Helper:**
+                - Chạy `python oauth_helper.py` để được hướng dẫn chi tiết
+                - Hoặc `python get_github_token.py` để lấy GitHub token nhanh
+                """)
             
             with st.expander("Clear All Settings", expanded=False):
                 st.warning("This will clear all user-entered credentials from this session.")

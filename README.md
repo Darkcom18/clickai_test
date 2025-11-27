@@ -93,6 +93,35 @@ result = process_query("List my GitHub repositories")
 print(result)
 ```
 
+## 🔐 OAuth & Credentials Setup
+
+### Quick OAuth Helpers
+
+**GitHub Token:**
+```bash
+python get_github_token.py
+```
+Script này sẽ mở browser và hướng dẫn bạn lấy GitHub token.
+
+**Google Drive OAuth:**
+```bash
+python setup_drive_oauth.py
+```
+Script này sẽ giúp bạn authorize Google Drive và lấy token.json.
+
+**OAuth Helper (Tất cả services):**
+```bash
+python oauth_helper.py
+```
+Interactive tool để hướng dẫn setup cho tất cả services.
+
+### Hoặc nhập trực tiếp trong Streamlit App
+
+1. Mở Streamlit app
+2. Click nút **"🔧 Settings"** trong sidebar
+3. Nhập GitHub token hoặc n8n webhook URL
+4. Click **"💾 Save"**
+
 ## 📖 Ví dụ sử dụng
 
 ### Chat Agent
