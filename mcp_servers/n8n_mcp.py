@@ -44,12 +44,11 @@ class N8NMCPServer:
         Returns:
             Response from workflow
         """
-        self._check_initialized()
-
         # Support full URL or relative path
         if workflow_id.startswith(('http://', 'https://')):
-            url = workflow_id  # Full URL provided
+            url = workflow_id  # Full URL provided - no config needed
         else:
+            self._check_initialized()  # Only check if using relative path
             url = f"{self.base_url}/{workflow_id}"  # Relative path
 
         headers = {}
@@ -87,12 +86,11 @@ class N8NMCPServer:
         Returns:
             Response from workflow
         """
-        self._check_initialized()
-
         # Support full URL or relative path
         if workflow_id.startswith(('http://', 'https://')):
-            url = workflow_id  # Full URL provided
+            url = workflow_id  # Full URL provided - no config needed
         else:
+            self._check_initialized()  # Only check if using relative path
             url = f"{self.base_url}/{workflow_id}"  # Relative path
 
         headers = {}
