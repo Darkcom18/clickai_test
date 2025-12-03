@@ -94,17 +94,29 @@ def main():
             
             with st.expander("n8n Webhook", expanded=False):
                 st.markdown("""
-                **How to get n8n Webhook URL:**
-                1. Open your n8n workflow
-                2. Add a "Webhook" node
-                3. Copy the webhook URL (e.g., `https://your-n8n.com/webhook/abc123`)
-                4. Paste below
+                **Cách sử dụng n8n Webhook:**
+
+                **Option 1: Nhập Full Webhook URL** (Khuyến nghị)
+                1. Mở n8n workflow của bạn
+                2. Thêm node "Webhook"
+                3. Copy **FULL webhook URL** (ví dụ: `https://your-n8n.cloud/webhook-test/send-email`)
+                4. Paste vào "n8n Webhook URL" bên dưới
+                5. Khi trigger, chỉ cần gõ: "send email to user@example.com"
+
+                **Option 2: Dùng Base URL + Workflow ID**
+                1. Base URL: `https://your-n8n.cloud`
+                2. Workflow ID: `webhook-test/send-email`
+                3. Khi trigger: "trigger workflow webhook-test/send-email"
+
+                **Để gửi email:**
+                - Gõ ngắn gọn: "send email to user@example.com about meeting"
+                - Hoặc: "gửi email cho user@example.com về cuộc họp"
                 """)
                 n8n_url = st.text_input(
-                    "n8n Webhook URL",
+                    "n8n Webhook URL (Full URL hoặc Base URL)",
                     value=st.session_state.get("user_N8N_WEBHOOK_BASE_URL", config.N8N_WEBHOOK_BASE_URL or ""),
-                    help="Example: https://your-n8n.com/webhook/abc123",
-                    placeholder="https://your-n8n.com/webhook/..."
+                    help="Full URL: https://your-n8n.cloud/webhook/send-email HOẶC Base: https://your-n8n.cloud",
+                    placeholder="https://gavinpham.app.n8n.cloud/webhook/send-email"
                 )
                 n8n_token = st.text_input(
                     "n8n Token (optional)",

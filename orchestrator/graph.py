@@ -42,7 +42,7 @@ def create_orchestrator():
             return {**state, "agent_type": "drive"}
         
         # n8n keywords
-        n8n_keywords = ["n8n", "workflow", "webhook", "trigger", "automation"]
+        n8n_keywords = ["n8n", "workflow", "webhook", "trigger", "automation", "email", "send email", "gửi email"]
         if any(keyword in query_lower for keyword in n8n_keywords):
             return {**state, "agent_type": "n8n"}
         

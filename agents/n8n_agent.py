@@ -18,7 +18,37 @@ class N8NAgent:
         self.tools = self._create_tools()
         self.llm_with_tools = self.llm.bind_tools(self.tools)
         self.prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are an n8n workflow assistant. Use tools to trigger workflows."),
+            ("system", """You are an n8n workflow assistant that can send emails via webhooks.
+
+**Email Workflow Configuration:**
+- Webhook URL: https://gavinpham.app.n8n.cloud/webhook/send-email
+- Method: POST
+- Expected data format: {"to": "email", "subject": "...", "body": "..."}
+
+**When user asks to send emails (natural language):**
+Examples:
+- "send email to john@example.com about meeting"
+- "email quoc.trung1802@gmail.com with subject Test"
+- "gửi email cho abc@gmail.com về cuộc họp chiều nay"
+
+**Your tasks:**
+1. Parse email details from natural language:
+   - Recipient (to): Extract from "to X", "cho X", email address
+   - Subject: Extract from "about X", "with subject X", "về X"
+   - Body: Generate professional email body based on context
+
+2. If subject/body not provided, generate them intelligently
+
+3. Call trigger_workflow with:
+   - workflow_id: "https://gavinpham.app.n8n.cloud/webhook/send-email" (full URL)
+   - data: {"to": "...", "subject": "...", "body": "..."}
+
+4. Always use the FULL webhook URL, not relative path
+
+**For generic workflow triggers:**
+- Use trigger_workflow tool with workflow_id and optional data
+- Support both full URLs and relative paths
+"""),
             ("human", "{input}"),
         ])
     
@@ -27,15 +57,28 @@ class N8NAgent:
         
         @tool
         def trigger_workflow(workflow_id: str, data: Optional[dict] = None) -> str:
-            """Trigger an n8n workflow via webhook."""
+            """Trigger an n8n workflow via webhook.
+
+            Args:
+                workflow_id: Full webhook URL or workflow path (e.g., "send-email")
+                data: Data to send to workflow. For email workflows: {"to": "email", "subject": "...", "body": "..."}
+            """
             try:
+                # Smart default: if no full URL provided and workflow_id looks like email endpoint
+                if not workflow_id.startswith(('http://', 'https://')) and 'email' in workflow_id.lower():
+                    workflow_id = "https://gavinpham.app.n8n.cloud/webhook/send-email"
+
                 result = self.n8n_mcp.trigger_workflow(workflow_id, data)
+
                 if result["success"]:
-                    return f"Workflow triggered successfully: {result.get('data', '')}"
+                    response_data = result.get('data', {})
+                    if isinstance(response_data, dict) and response_data.get('success'):
+                        return f"✅ {response_data.get('message', 'Workflow triggered successfully')}"
+                    return f"✅ Workflow triggered successfully: {response_data}"
                 else:
-                    return f"Failed to trigger workflow: {result}"
+                    return f"❌ Failed to trigger workflow: {result}"
             except Exception as e:
-                return f"Error: {str(e)}"
+                return f"❌ Error: {str(e)}"
         
         @tool
         def test_connection() -> str:
@@ -43,11 +86,11 @@ class N8NAgent:
             try:
                 result = self.n8n_mcp.test_connection()
                 if result["connected"]:
-                    return "Connected to n8n successfully"
+                    return "✅ Connected to n8n successfully"
                 else:
-                    return f"Connection failed: {result.get('error', '')}"
+                    return f"❌ Connection failed: {result.get('error', '')}"
             except Exception as e:
-                return f"Error: {str(e)}"
+                return f"❌ Error: {str(e)}"
         
         return [trigger_workflow, test_connection]
     

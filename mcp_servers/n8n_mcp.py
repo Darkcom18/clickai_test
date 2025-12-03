@@ -36,20 +36,26 @@ class N8NMCPServer:
     ) -> Dict[str, Any]:
         """
         Trigger an n8n workflow via webhook.
-        
+
         Args:
-            workflow_id: Workflow ID or webhook path
+            workflow_id: Either full webhook URL or workflow ID/path
             data: Data to send to workflow
-            
+
         Returns:
             Response from workflow
         """
         self._check_initialized()
-        url = f"{self.base_url}/{workflow_id}"
+
+        # Support full URL or relative path
+        if workflow_id.startswith(('http://', 'https://')):
+            url = workflow_id  # Full URL provided
+        else:
+            url = f"{self.base_url}/{workflow_id}"  # Relative path
+
         headers = {}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
-        
+
         response = requests.post(
             url,
             json=data or {},
@@ -57,7 +63,7 @@ class N8NMCPServer:
             timeout=30
         )
         response.raise_for_status()
-        
+
         return {
             "status_code": response.status_code,
             "data": response.json() if response.content else None,
@@ -72,21 +78,27 @@ class N8NMCPServer:
     ) -> Dict[str, Any]:
         """
         Trigger workflow with query parameters and body.
-        
+
         Args:
-            workflow_id: Workflow ID or webhook path
+            workflow_id: Either full webhook URL or workflow ID/path
             params: Query parameters
             body: Request body
-            
+
         Returns:
             Response from workflow
         """
         self._check_initialized()
-        url = f"{self.base_url}/{workflow_id}"
+
+        # Support full URL or relative path
+        if workflow_id.startswith(('http://', 'https://')):
+            url = workflow_id  # Full URL provided
+        else:
+            url = f"{self.base_url}/{workflow_id}"  # Relative path
+
         headers = {}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
-        
+
         response = requests.post(
             url,
             params=params,
@@ -95,7 +107,7 @@ class N8NMCPServer:
             timeout=30
         )
         response.raise_for_status()
-        
+
         return {
             "status_code": response.status_code,
             "data": response.json() if response.content else None,
